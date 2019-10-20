@@ -2,6 +2,7 @@ import mysql.connector
 import time
 from os import system
 import sys
+from datetime import date
 
 def connectDB ():
 	mydb = mysql.connector.connect(
@@ -25,7 +26,7 @@ def login():
 	password_admin = "a"
 
 	print("\n\n\n\n")
-	user = str(input(" enter username(reception or admin): "))
+	user = str(input(" enter username(r or a): "))
 	password = str(input(" enter password: "))
 
 	system('clear')
@@ -50,23 +51,42 @@ def displayFlight(rows):
 		print(r)
 		print('+-----------+----------------+--------------+----------------+--------------+--------+----------------+-----------+')
 
-	stay = input("\n\npress enter to continue......")
 
 def displayPassenger(rows):
 	d_strings = []
 	for r in rows:
-		line = '| '+ str(r[0]).ljust(13)+ '| '+r[1].ljust(14)+ '| '+r[2].ljust(12)+'| '+r[3].ljust(15)+'| '+r[4].ljust(12)+'| '
+		line = '| '+ str(r[0]).ljust(13)+ '| '+r[1].ljust(17)+ '| '+r[2].ljust(14)+'| '+r[3].ljust(14)+'| '+r[4].ljust(15)+'| '+r[5].ljust(12)+'| '
 		d_strings.append(line)
 
-	print('+--------------+---------------+-------------+----------------+-------------+')
-	print('| passenger_id |     cnic      | phonenumber |     address    | nationality |')
-	print('+--------------+---------------+-------------+----------------+-------------+')
+	print('+--------------+------------------+---------------+---------------+----------------+-------------+')
+	print('| passenger_id |  passenger name  |     cnic      |  phonenumber  |     address    | nationality |')
+	print('+--------------+------------------+---------------+---------------+----------------+-------------+')
 
 	for r in d_strings:
 		print(r)
-		print('+--------------+---------------+-------------+----------------+-------------+')
+		print('+--------------+------------------+---------------+---------------+----------------+-------------+')
 
-	stay = input("\n\npress enter to continue......")
+
+def displayTicket(rows):
+	d_strings = []
+	for r in rows:
+		line = '| '+ str(r[0]).ljust(10)+ '| '+str(r[1]).ljust(14)+ '| '+r[2].ljust(12)+'| '
+		d_strings.append(line)
+
+	print('+-----------+---------------+-------------+')
+	print('| ticket_id |  passenger_id |  flight id  |')
+	print('+-----------+---------------+-------------+')
+
+	for r in d_strings:
+		print(r)
+		print('+-----------+---------------+-------------+')
+
+
+def present(id,items):
+	for x in items:
+		if id == x[0]:
+			return True
+	return False
 
 def correctName(name):
 	if not name.isalpha():
@@ -132,6 +152,12 @@ def correctDate(d):
 		return True
 
 def getInput(attr,DB= None):
+	codes = ['LHR','ISL','KSM','USA','UKK','RWP','QTA','LDN','MRE','LDN','SAA','KRI']
+	codes_arr = ""
+	for c in codes:
+		codes_arr += c + " "
+
+
 	if attr == 'name':
 		name = input("enter name: ")
 		while not correctName(name):
@@ -184,14 +210,23 @@ def getInput(attr,DB= None):
 		return name
 
 	elif attr == 'departure_code':
+		print("available airports: %s" % codes_arr)
 		d_code = input("enter departure airport code: ")
-		while not correctCode(d_code):
+		while not correctCode(d_code) or not present(d_code,codes):
 			d_code = input("enter departure airport code: ")
 		return d_code
 
+	elif attr == 'code':
+		print("available airports: %s" % codes_arr)
+		d_code = input("enter airport code: ")
+		while not correctCode(d_code) or not present(d_code,codes):
+			d_code = input("enter airport code: ")
+		return d_code
+
 	elif attr == 'arrival_code':
+		print("available airports: %s" % codes_arr)
 		a_code = input("enter arrival airport code: ")
-		while not correctCode(a_code):
+		while not correctCode(a_code) or not present(a_code,codes):
 			a_code = input("enter arrival airport code: ")
 		return a_code
 
@@ -413,6 +448,7 @@ def timeFlights(DB):
 	ans = cursor.fetchall()
 
 	displayFlight(ans)
+	stay = input("\n\npress enter to continue......")
 
 
 def newTicket(DB):
@@ -456,6 +492,7 @@ def cheapFlight(DB):
 	ans = cursor.fetchall()
 
 	displayFlight(ans)
+	stay = input("\n\npress enter to continue......")
 
 def flightHistory(DB):
 	cnic = getInput('existing cnic',DB)
@@ -471,6 +508,110 @@ def flightHistory(DB):
 	ans = cursor.fetchall()
 
 	displayFlight(ans)
+	stay = input("\n\npress enter to continue......")
+
+
+def cancelTicket(DB):
+	cnic = getInput('existing cnic',DB)
+	q = "SELECT passenger_id from passenger where cnic = '"+cnic+"';"
+	cursor = DB.cursor()
+	ans = cursor.execute(q)
+	passenger_id = cursor.fetchall()
+	passenger_id = str(passenger_id[0][0])
+
+	#find all tickets with that
+	query = "SELECT * from ticket where passenger_id = '"+passenger_id+"';"
+	cursor.execute(query)
+	tickets = cursor.fetchall()
+
+	if(len(tickets) < 1):
+		print('no tickets exist for this passenger')
+		return
+
+	displayTicket(tickets)
+
+	ticket_id = int(input('enter ticket id you would like to cancel: '))
+	while(not present(ticket_id,tickets)):
+		ticket_id = int(input('invalid ticket id. choose again: '))
+
+
+	a = input("do you wish to go through with this? (y/n): ")
+	if(a == 'n'):
+		return
+
+	query = "DELETE FROM ticket where ticket_id = '"+str(ticket_id)+"';"
+	cursor.execute(query)
+	DB.commit()
+	cursor.close()
+
+	print("ticket cancelled successfully")
+
+def cancelFlights(DB):
+	q = "SELECT * from flight"
+	cursor = DB.cursor()
+	cursor.execute(q)
+	ans = cursor.fetchall()
+
+	displayFlight(ans)
+
+	print('\n\n')
+
+	flight_id = input("enter flight_id of flight t cancel: ")
+	while not present(flight_id,ans):
+		flight_id = input("wrong id. enter again: ")
+
+	a = input("do you wish to go through with this? (y/n): ")
+	if(a == 'n'):
+		return
+
+	query = "DELETE from flight where flight_id = '"+flight_id+"';"
+	cursor.execute(query)
+	DB.commit()
+	cursor.close()
+
+	print("flight cancelled successfully")
+
+
+def viewFlights(DB):
+	airport = getInput('code')
+
+	today = str(date.today())
+	query = "SELECT * from flight where (departure_code = '"+airport+"' or arrival_code = \
+	'"+airport+"') and date_ = '"+today +"';"
+
+	cursor = DB.cursor()
+	cursor.execute(query)
+	ans = cursor.fetchall()
+
+	displayFlight(ans)
+	stay = input("\n\npress enter to continue......")
+
+def displayTables(DB):
+	cursor = DB.cursor()
+
+	query = "SELECT * from passenger;"
+	cursor.execute(query)
+	ans = cursor.fetchall()
+
+	print('\t\t\t\tPassenger')
+	displayPassenger(ans)
+	print('\n\n\n')
+
+	query = "SELECT * from flight;"
+	cursor.execute(query)
+	ans = cursor.fetchall()
+
+	print('\t\t\t\t\t Flight')
+	displayFlight(ans)
+	print('\n\n\n')
+
+	query = "SELECT * from ticket;"
+	cursor.execute(query)
+	ans = cursor.fetchall()
+
+	print('\t\tTicket')
+	displayTicket(ans)
+	stay = input("\n\npress enter to continue......")
 
 def receptionOptions(DB):
 	x = True
