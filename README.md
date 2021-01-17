@@ -27,3 +27,5 @@ It uses a MySQL database to keep track of:
 
 All three have their own tables in the database with the following scheme:
 ![schema](https://github.com/laa225/Airline-management-system/blob/master/ER_diagram.png?raw=true)
+
+## Usage
