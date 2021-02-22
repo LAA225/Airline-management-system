@@ -29,3 +29,52 @@ All three have their own tables in the database with the following scheme:
 ![schema](https://github.com/laa225/Airline-management-system/blob/master/ER_diagram.png?raw=true)
 
 ## Usage
+### Prerequisites
+* Linux 
+* Python 3.x
+* sql server (installation command given)
+* sql python connector (installation command given)
+
+### Install sql server and connector
+
+In the terminal run the following commands
+```
+$ sudo apt-get update
+$ sudo apt-get install mysql-server
+
+$ sudo pip3 install mysql-connector
+```
+You will now have a an sql server set up along with a python connector which allows you to access the database set up from python code. as is done in adms.py
+
+### Set up database
+The files tables.sql and value.sql contain commands to set up the database for airline management system. The following commands will create the db, the tables specified according to the schema above and fill it with some values. replace <> with your values
+
+```
+sudo mysql
+CREATE DATABASE AMS;
+USE AMS;
+source <path to tables.sql>
+source <path to value.sql>
+exit;
+```
+
+### Set password for root user
+by default the password for the root user is root when you install sql server. It can always be changed if needed using the following commands:
+run the following commands to change the password for the root user. replace <> with your values
+
+```
+sudo mysql
+UPDATE mysql.user SET authentication_string=null WHERE User='root';
+flush privileges;
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '<your_password_here>';
+flush privileges;
+exit;
+```
+
+**Make sure to set the parameter passwd with your own password in the function connectDB (line 12 in adms.py)**
+**Can also change the user if not comfortable using root. but make sure that user has read/write privileges for the db set up**
+
+### Run the airline management system
+```
+python3 adms.py
+```
