@@ -1,4 +1,4 @@
-/*CREATE TABLE passenger( 
+CREATE TABLE passenger( 
 passenger_id INT NOT NULL AUTO_INCREMENT, 
 passenger_name VARCHAR(100) NOT NULL, 
 cnic CHAR(13) NOT NULL,
@@ -11,6 +11,7 @@ CREATE TABLE flight(
 flight_id CHAR(5) NOT NULL,
 arrival_code VARCHAR(3) NOT NULL,
 departure_code VARCHAR(3) NOT NULL,
+departure_time TIME NOT NULL,
 arrival_time TIME NOT NULL,
 fare INT NOT NULL,
 airplane_model CHAR(7),
@@ -26,4 +27,4 @@ PRIMARY KEY (ticket_id),
 FOREIGN KEY (passenger_id) REFERENCES passenger (passenger_id) ON DELETE CASCADE,
 FOREIGN KEY (flight_id) REFERENCES flight (flight_id) ON DELETE CASCADE
 );
-*/
+

@@ -9,7 +9,8 @@ def connectDB ():
 	host="localhost",
 	database = "AMS",
 	user="root",
-	passwd="root")
+	passwd="root",
+	auth_plugin="mysql_native_password")
 
 	return mydb
 
@@ -96,12 +97,14 @@ def correctName(name):
 
 def correctCnic(cnic):
 	if len(cnic) != 13 or not cnic.isnumeric():
+		print("cnic should be a 13 digit number")
 		return False
 	else:
 		return True
 
 def correctNumber(number):
 	if len(number) != 11 or not number.isnumeric():
+		print("phone number should be an 11 digit number")
 		return False
 	else:
 		return True
