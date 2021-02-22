@@ -57,6 +57,9 @@ source <path to tables.sql>
 source <path to value.sql>
 exit;
 ```
+What it will look like if setup is successful
+
+![schema](https://github.com/laa225/Airline-management-system/blob/master/afterRunningCommands.png?raw=true)
 
 ### Set password for root user
 by default the password for the root user is root when you install sql server. It can always be changed if needed using the following commands:
