@@ -79,5 +79,5 @@ exit;
 
 ### Run the airline management system
 ```
-python3 adms.py
+python adms.py
 ```
